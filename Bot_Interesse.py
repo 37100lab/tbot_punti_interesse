@@ -8,7 +8,7 @@ def dist(lat1,lon1, lat2, lon2):
     return 6371 * 2 * m.asin(m.sqrt(m.pow(m.sin((m.radians(lat2) - m.radians(lat1)) / 2), 2) + m.cos(lat1) * m.cos(lat2) * m.pow(m.sin((m.radians(lon2) - m.radians(lon1)) / 2), 2)))
 
 def start(update: Update, context: CallbackContext) -> None:
-    testo = "Benvenuto!!! \nQuesto bot ti permette di trovare il punto di interesse più vicino a te. \nInvia la tua posizione."
+    testo = "Benvenuto!!!\nQuesto bot ti permette di trovare il punto di interesse più vicino a te.\nInvia la tua posizione."
     context.bot.send_message(chat_id=update.effective_chat.id, text=testo)
 
 def distanza(update: Update, context: CallbackContext) -> None:
@@ -29,32 +29,34 @@ def distanza(update: Update, context: CallbackContext) -> None:
         testo_dist = "\nDistanza: " + str(round(d[0],2)) + " km"
         context.bot.send_message(chat_id=update.effective_chat.id, text=testo+testo_dist)
         update.message.reply_location(coord_x[ind], coord_y[ind])
+        testo = "Per trovare nuovamente il punto di interesse più vicino invia la tua posizione."
+        context.bot.send_message(chat_id=update.effective_chat.id, text=testo)
     except:
         testo_try = "Attenzione!!!\nInviare solo la posizione attuale.\nInterrompere la condivisione della posizione in tempo reale."
         context.bot.send_message(chat_id=update.effective_chat.id, text=testo_try)
 
 def echo(update: Update, context: CallbackContext) -> None:
     testo = "Non è un comando valido"
-    context.bot.send_message(chat_id=update.effective_chat.id, text=testo) #update.message.text per leggere il messaggio ricevuto
+    context.bot.send_message(chat_id=update.effective_chat.id, text=testo)
 
 def main():
-    updater = Updater("1921881808:AAHLJx0ehTZAYQx7IrZueO6azja47AAvalk")
+    updater = Updater("bot-id")
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
-    dispatcher.add_handler(MessageHandler(Filters.location, distanza))    #update.message.reply_location(10,10) metti coordinate del posto e invia
+    dispatcher.add_handler(MessageHandler(Filters.location, distanza))
 
     updater.start_polling()
 
     updater.idle()
 
 con = psycopg2.connect(
-    host="127.0.0.1",       #192.168.20.20 IP locale    #3.142.202.105
-    database="geoapp",
-    user="postgres",
-    password="plumake2021!"
-)
+	host="host",
+	database="database",
+	user="user",
+	password="password"
+       	 )
 
 cur = con.cursor()
 v = []
@@ -62,9 +64,9 @@ coord_x = []
 coord_y = []
 nome = []
 
-cur.execute("select ST_AsGeoJSON(geom) from puntidiinteresse")    #ricava coordinate in GeoJSON
+cur.execute("select ST_AsGeoJSON(geom) from punti_di_interesse_geom")
 a = cur.fetchall()
-cur.execute("select nome from puntidiinteresse")    #ricava coordinate in GeoJSON
+cur.execute("select nome from punti_di_interesse_geom")
 b = cur.fetchall()
 for i in range(0,len(a)):
     v.append(json.loads(a[i][0]))
